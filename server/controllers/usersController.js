@@ -128,8 +128,44 @@ async function addToCostOfGoods(req, res){
     }
 }
 
+async function addToSupplies(req, res){
+    try {
+        const { date_bought, item, cost, userID } = req.body
+        const user = await User.findOne({_id : userID})
+        let updatedSupplies = []
+
+        const newSupply = {
+            date_bought,
+            item, 
+            cost
+        }
+
+        if(user){
+            updatedSupplies = [...user.supplies, newSupply]
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userID, {
+            supplies : updatedSupplies
+        })
+
+        res.send({
+            success : true,
+            user : updatedUser
+        })
+
+
+    }
+    catch (e) {
+        res.send({
+            success : false,
+            error : e.toString()
+        })
+    }
+}
+
 module.exports = {
     createUser,
     addToSales,
-    addToCostOfGoods
+    addToCostOfGoods,
+    addToSupplies
 }
