@@ -1,5 +1,5 @@
 
-const { generatePasswordHash } = require('../middleware/auth')
+const { generatePasswordHash, validatePW, generateUserToken } = require('../middleware/auth')
 const User = require('../models/Users')
 
 async function createUser(req, res) {
@@ -44,6 +44,42 @@ async function createUser(req, res) {
             success : false,
             error : e.toString()
         })
+    }
+}
+
+const login = async (req, res) => {
+    try {
+        const { userName, password} = req.body;
+        const user = await User.findOne({userName : userName})
+
+        if(!user){
+            res.json({
+                success : false,
+                message : 'Could not find user'
+            }).status(204)
+        }
+
+        const isPWValid = await validatePW(password, user.password)
+
+        if (!isPWValid) {
+            res
+            .json({ success: false, message: "Password was incorrect." })
+            .status(204);
+            return;
+        }
+
+        const userData = {
+            userName : user.userName,
+        }
+
+        const token = generateUserToken(userData)
+        res.json({
+            success : true,
+            userID : user._id,
+            token
+        })
+    } catch (error) {
+        // console.log(error)
     }
 }
 
@@ -152,8 +188,40 @@ async function addToSupplies(req, res){
             success : true,
             user : updatedUser
         })
+    }
+    catch (e) {
+        res.send({
+            success : false,
+            error : e.toString()
+        })
+    }
+}
 
+async function addToMileages(req, res){
+    try {
+        const { date_traveled, starting_mileage, ending_mileage, difference, userID } = req.body
+        const user = await User.findOne({_id : userID})
+        let updatedMileages = []
 
+        const newMileage = {
+            date_traveled,
+            starting_mileage,
+            ending_mileage,
+            difference
+        }
+
+        if(user){
+            updatedMileages = [...user.mileages, newMileage]
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userID, {
+            mileages : updatedMileages
+        })
+
+        res.send({
+            success : true,
+            user : updatedUser
+        })
     }
     catch (e) {
         res.send({
@@ -165,7 +233,9 @@ async function addToSupplies(req, res){
 
 module.exports = {
     createUser,
+    login,
     addToSales,
     addToCostOfGoods,
-    addToSupplies
+    addToSupplies,
+    addToMileages
 }

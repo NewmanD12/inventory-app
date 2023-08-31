@@ -9,8 +9,10 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/create-user', userController.createUser)
+router.post('/login', userController.login)
 router.post('/add-to-sales', userController.addToSales)
 router.post('/add-to-cost-of-goods', userController.addToCostOfGoods)
 router.post('/add-to-supplies', userController.addToSupplies)
+router.post('/add-to-mileages', userController.addToMileages)
 
 module.exports = router; 
