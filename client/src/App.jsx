@@ -7,6 +7,7 @@ import EbayLog from './Pages/EbayLog';
 import CostOfGoods from './Pages/CostOfGoods';
 import Supplies from './Pages/Supplies'
 import Mileage from './Pages/Mileage'
+import Login from './Pages/Login';
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
       {
         index : true,
         element : <Welcome />
+      },
+      {
+        path : '/login',
+        element : <Login />
       },
       {
         path : '/ebay-log',
