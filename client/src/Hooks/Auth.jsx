@@ -23,6 +23,37 @@ export const AuthProvider = ({ children }) => {
       }
     }, [isAuthLoading])
 
+    const register = async (firstName, lastName, userName, password) => {
+      setIsAuthLoading(true);
+      const registerResult = await registerUser(firstName, lastName, userName, password);
+      if(registerResult.success){
+        const loginResult = await loginUser(userName, password)
+        if(loginResult.success){
+          setLSUserData(loginResult.token, loginResult.userFirstName, loginResult.userLastName, loginResult.userName)
+        }
+      }
+      setIsAuthLoading(false);
+      return registerResult;
+  };
+
+    const registerUser = async (firstName, lastName, userName, password) => {
+      const url = `${userEndpoint}/create-user`
+      const response = await fetch(url, {
+        method : "POST",
+        headers : {
+          "Content-Type" : "application/json"
+        },
+        body : JSON.stringify({
+          firstName,
+          lastName,
+          userName,
+          password
+        })
+      });
+      const responseJSON = await response.json()
+      return responseJSON
+    }
+
     const login = async (userName, password) => {
         setIsAuthLoading(true);
         const loginResult = await loginUser(userName, password);
@@ -63,7 +94,8 @@ export const AuthProvider = ({ children }) => {
             userName,
             userID,
             login,
-            logout
+            logout,
+            register
         }),
         [userToken]);
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

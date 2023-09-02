@@ -9,10 +9,10 @@ import Form from 'react-bootstrap/Form';
 
 
 const Login = () => {
-    const auth = useAuth();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState('')
+  const auth = useAuth();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState('')
 	const navigate = useNavigate() // be able to navigate to home on login
 
 
@@ -20,7 +20,12 @@ const Login = () => {
         // console.log(username, password)
         const loginResult = await auth.login(username, password)
         console.log(loginResult)
-
+        if(loginResult.success) {
+          navigate('/')
+        }
+        else {
+          setErrorMessage(loginResult.message)
+        }
     }
 
     return ( 
@@ -54,18 +59,7 @@ const Login = () => {
                   variant="primary" type="submit"
                   onClick={async (e) => {
                     e.preventDefault()
-                    // console.log(useAuth())
                     handleLogin()
-                    // console.log(username, password)
-                    // const loginResult = await auth.login(username, password)
-                    // console.log(loginResult)
-                    // if(loginResult.success) {
-                    //     navigate('/')
-                    // }
-                    // else{
-                    //     // console.log(loginResult)
-                    //     setErrorMessage(loginResult.message)
-                    // }
                   }}
                 >
                   Login

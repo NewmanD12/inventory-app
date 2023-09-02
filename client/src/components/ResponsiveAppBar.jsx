@@ -12,17 +12,18 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useAuth } from '../Hooks/Auth'
 import { useNavigate } from "react-router-dom";
 
 const pages = ['Ebay Log', 'Cost of Goods', 'Supplies', 'Mileage'];
-const settings = ['Profile', 'Account'];
+const settings = ['Profile'];
 
 const ResponsiveAppBar = () => {
 const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-//   const auth = useAuth();
+  const auth = useAuth();
   const navigate = useNavigate()
-//   console.log(auth)
+  console.log(auth)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -95,7 +96,7 @@ const [anchorElNav, setAnchorElNav] = React.useState(null);
                     display: { xs: 'block', md: 'none' },
                 }}
                 >
-                {pages.map((page) => (
+                {auth.userName && pages.map((page) => (
                     <MenuItem key={page} value={page} onClick={() => {
                         navigate(`/${page.toLowerCase().replaceAll(' ', '-')}`)
                         handleCloseNavMenu()
@@ -125,7 +126,7 @@ const [anchorElNav, setAnchorElNav] = React.useState(null);
                 LOGO
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                {pages.map((page) => (
+                {auth.userName && pages.map((page) => (
                 <Button
                     key={page}
                     value={page}
@@ -167,6 +168,15 @@ const [anchorElNav, setAnchorElNav] = React.useState(null);
                     <Typography textAlign="center">{setting}</Typography>
                     </MenuItem>
                 ))}
+
+                {auth.userName &&   <MenuItem  onClick={handleCloseUserMenu}>
+                                        <Typography textAlign="center" onClick={(e) => {
+                                            auth.logout()
+                                            navigate('/')
+                                        }}>Logout</Typography>
+                                    </MenuItem>
+                }
+
 
                 </Menu>
             </Box>
