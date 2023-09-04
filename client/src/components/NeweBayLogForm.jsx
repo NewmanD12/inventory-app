@@ -13,13 +13,14 @@ const NeweBayLogForm = () => {
     const auth = useAuth()
     const [sale, setSale] = useState({})
     const [showingEbayRevenueInput, setShowingEbayRevenueInput] = useState(false)
+    const [showingNetSalesInput, setShowingNetSalesInput] = useState(false)
     const  MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
     let errors = {}
     
     const EbayRevenueInput = () => {
         return  <div>
                     <Form.Control id='ebay_revenue' type='text' name='ebay_revenue' />
-                    {errors.ebay_revenue && <p>{errors.ebay_revenue}</p>}
+                    {errors.ebay_revenue ? <p>{errors.ebay_revenue}</p> : null}
                     <Button onClick={() => {
                         const input = document.getElementById('ebay_revenue')
                         const manual_input = parseFloat(input.value)
@@ -42,13 +43,40 @@ const NeweBayLogForm = () => {
                 </div>
     }
 
+    const NetSalesInput = () => {
+        return  <div>
+                    <Form.Control id='net_sales' type='text' name='net_sales' />
+                    <Button onClick={() => {
+                        const input = document.getElementById('net_sales')
+                        const manual_input = parseFloat(input.value)
+                        // console.log(manual_input)
+                        if(typeof manual_input === 'number' && !isNaN(manual_input)){
+                            try {
+                                setSale({...sale, ['net_sales'] : manual_input})
+                                toggleNetSalesInput()
+                            }
+                            catch (e) {
+                                console.log(e.toString())
+                            }
+                        }
+                    }}>Change</Button>
+                    <Button variant='danger' onClick={toggleNetSalesInput}>Cancel</Button>
+                </div>
+    }
+
     const toggleEbayRevenueInput = () => {
         setShowingEbayRevenueInput(!showingEbayRevenueInput)
+    }
+
+    const toggleNetSalesInput = () => {
+        setShowingNetSalesInput(!showingNetSalesInput)
     }
 
     return (
 
         <Form>
+
+            <Button onClick={() => console.log(sale)}>Show sale</Button>
 
             <Form.Group onChange={(e) => {
                 const [year, monthNum] = e.target.value.split('-')
@@ -62,6 +90,9 @@ const NeweBayLogForm = () => {
 
             <Form.Group onChange={(e) => {
                 setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
+                if(sale.taxes_and_fees){
+                    setSale({...sale, ['ebay_revenue'] : parseFloat(e.target.value) - sale.taxes_and_fees, [e.target.name]: parseFloat(e.target.value)})
+                }
             }}>
                 <Form.Label>Total Sales:</Form.Label>
                 <Form.Control type="text" name="total_sales"/>
@@ -70,7 +101,7 @@ const NeweBayLogForm = () => {
             <Form.Group onChange={(e) => {
                 setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
                 if(sale.total_sales){
-                    setSale({...sale, ['ebay_revenue'] : sale.total_sales - parseFloat(e.target.value)})
+                    setSale({...sale, ['ebay_revenue'] : sale.total_sales - parseFloat(e.target.value), [e.target.name]: parseFloat(e.target.value)})
                 }
             }}>
                 <Form.Label>Taxes and Fees:</Form.Label>
@@ -80,14 +111,17 @@ const NeweBayLogForm = () => {
 
             <Form.Group>
                 <Form.Label>Ebay Revenue:</Form.Label>
-                <p>{sale.ebay_revenue}</p>
+                <p>{!isNaN(sale.ebay_revenue) ? sale.ebay_revenue : null}</p>
                 {showingEbayRevenueInput ? <EbayRevenueInput/> : null}
-                <p onClick={toggleEbayRevenueInput}>Not look right? Click here to manually input your eBay Revenue.</p>
-
+                {!showingEbayRevenueInput ? <p onClick={toggleEbayRevenueInput}>Not look right? Click here to manually input your eBay Revenue.</p> : null}
             </Form.Group>
 
             <Form.Group onChange={(e) => {
                 setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
+                if(sale.ebay_revenue && sale.ebay_fees && sale.shipping_labels){
+                    const net_sales = (sale.ebay_revenue - sale.shipping_labels - parseFloat(e.target.value)).toFixed(2)
+                    setSale({...sale, ['net_sales'] : parseFloat(net_sales), [e.target.name]: parseFloat(e.target.value)})
+                }
             }}>
                 <Form.Label>eBay Fees:</Form.Label>
                 <Form.Control type="text" name="ebay_fees"/>
@@ -95,16 +129,20 @@ const NeweBayLogForm = () => {
 
             <Form.Group onChange={(e) => {
                 setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
+                if(sale.ebay_revenue && sale.ebay_fees && sale.shipping_labels){
+                    const net_sales = (sale.ebay_revenue - sale.ebay_fees - parseFloat(e.target.value)).toFixed(2)
+                    setSale({...sale, ['net_sales'] : parseFloat(net_sales), [e.target.name]: parseFloat(e.target.value)})
+                }
             }}>
                 <Form.Label>Shipping Labels:</Form.Label>
                 <Form.Control type="text" name="shipping_labels"/>
             </Form.Group>
 
-            <Form.Group onChange={(e) => {
-                setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
-            }}>
+            <Form.Group>
                 <Form.Label>Net Sales:</Form.Label>
-                <Form.Control type="text" name="net_sales"/>
+                <p>{!isNaN(sale.net_sales) ? sale.net_sales : null}</p>
+                {showingNetSalesInput ? <NetSalesInput /> : null}
+                {!showingNetSalesInput ? <p onClick={toggleNetSalesInput}>Not look right? Click here to manually input your net sales.</p> : null}
             </Form.Group>
 
             <Form.Group onChange={(e) => {
@@ -114,9 +152,7 @@ const NeweBayLogForm = () => {
                 <Form.Control type="text" name="deposits"/>
             </Form.Group>
 
-            <Form.Group onChange={(e) => {
-                setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
-            }}>
+            <Form.Group>
                 <Form.Label>Total Refunds and Credits:</Form.Label>
                 <Form.Control type="text" name="total_refunds_credits"/>
             </Form.Group>
