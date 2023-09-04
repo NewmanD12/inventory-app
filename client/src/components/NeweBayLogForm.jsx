@@ -12,13 +12,38 @@ const NeweBayLogForm = () => {
 
     const auth = useAuth()
     const [sale, setSale] = useState({})
+    const [showingEbayRevenueInput, setShowingEbayRevenueInput] = useState(false)
     const  MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+    let errors = {}
+    
+    const EbayRevenueInput = () => {
+        return  <div>
+                    <Form.Control id='ebay_revenue' type='text' name='ebay_revenue' />
+                    {errors.ebay_revenue && <p>{errors.ebay_revenue}</p>}
+                    <Button onClick={() => {
+                        const input = document.getElementById('ebay_revenue')
+                        const manual_input = parseFloat(input.value)
+                        
+                        if(typeof manual_input === 'number' && !isNaN(manual_input)){
+                            try {
+                                setSale({...sale, ['ebay_revenue'] : manual_input})
+                                toggleEbayRevenueInput()
+                            } catch (e) {
+                                console.log(e.toString())
+                            }
+                        } else{
+                            errors = {...errors, ['ebay_revenue'] : "please enter a number"}
+                            console.log(errors)
+                            console.log('contains nothing or not a number')
+                        }
+                        
+                    }}>Change</Button>
+                    <Button variant='danger' onClick={toggleEbayRevenueInput}>Cancel</Button>
+                </div>
+    }
 
-    let eBayRevenueInput;
-    if(sale.total_sales && sale.taxes_and_fees){
-        eBayRevenueInput = <Form.Control type="text" name="ebay_revenue"/>
-    } else{
-        eBayRevenueInput = <Form.Control type="text" name="ebay_revenue"/>
+    const toggleEbayRevenueInput = () => {
+        setShowingEbayRevenueInput(!showingEbayRevenueInput)
     }
 
     return (
@@ -30,7 +55,7 @@ const NeweBayLogForm = () => {
                 const month = MONTHS[parseInt(monthNum) - 1]
                 const yearNum = parseInt(year)
                 setSale({...sale, ['month']: month, ['year'] : yearNum})
-            }}>
+                }}>
                 <Form.Label>Date:</Form.Label>
                 <Form.Control type="date" name='date' />
             </Form.Group>
@@ -44,17 +69,20 @@ const NeweBayLogForm = () => {
 
             <Form.Group onChange={(e) => {
                 setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
+                if(sale.total_sales){
+                    setSale({...sale, ['ebay_revenue'] : sale.total_sales - parseFloat(e.target.value)})
+                }
             }}>
                 <Form.Label>Taxes and Fees:</Form.Label>
                 <Form.Control type="text" name="taxes_and_fees"/>
             </Form.Group>
 
 
-            <Form.Group onChange={(e) => {
-                    setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
-                }}>
+            <Form.Group>
                 <Form.Label>Ebay Revenue:</Form.Label>
-                {eBayRevenueInput}
+                <p>{sale.ebay_revenue}</p>
+                {showingEbayRevenueInput ? <EbayRevenueInput/> : null}
+                <p onClick={toggleEbayRevenueInput}>Not look right? Click here to manually input your eBay Revenue.</p>
 
             </Form.Group>
 
@@ -128,8 +156,7 @@ const NeweBayLogForm = () => {
             }}>
                 <Form.Label>Taxable Total:</Form.Label>
                 <Form.Control type="text" name="taxable_total"/>
-            </Form.Group>
-            
+            </Form.Group>         
 
             <Button
                 variant="primary" type="submit"
