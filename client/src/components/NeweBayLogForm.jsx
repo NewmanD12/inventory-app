@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from '../Hooks/Auth'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import axios from 'axios';
 
 const NeweBayLogForm = () => {
 
+    const userEndpoint = import.meta.env.VITE_USER_ENDPOINT
     const auth = useAuth()
-
+    // console.log(auth)
 
 
     const [sale, setSale] = useState({})
@@ -111,15 +113,6 @@ const NeweBayLogForm = () => {
                 </div>
     }
 
-    const calculateTotalExpenses = () => {
-        if(sale.ebay_fees && sale.shipping_labels && sale.total_refunds_credits && sale.total_cost_of_goods && sale.supplies_storage_costs && sale.mileage_deduction){
-            setSale({...sale, ['total_expenses'] : sale.ebay_fees + sale.shipping_labels + sale.total_refunds_credits + sale.total_cost_of_goods + sale.supplies_storage_costs + sale.mileage_deduction})
-            return true
-            // console.log('total expense')
-        }
-        return 'Not enough info yet'
-    }
-
     const toggleEbayRevenueInput = () => {
         setShowingEbayRevenueInput(!showingEbayRevenueInput)
     }
@@ -136,6 +129,13 @@ const NeweBayLogForm = () => {
         setShowingMileageDeductionInput(!showingMileageDeductionInput)
     }
 
+    const handleSubmit = () => {
+        const fullSale = {...sale, ['userID'] : auth.userID}
+        axios.post(`${userEndpoint}/add-to-sales`, fullSale)
+                .then((res) => console.log(res))
+                .catch((err) => console.log(err))
+        // console.log(fullSale)
+    }
 
 
     return (
@@ -283,7 +283,7 @@ const NeweBayLogForm = () => {
                 variant="primary" type="submit"
                 onClick={(e) => {
                 e.preventDefault()
-                console.log(sale)
+                handleSubmit()
                 }}
             >Submit</Button>
         </Form>
