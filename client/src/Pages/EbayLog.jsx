@@ -8,6 +8,7 @@ import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import NeweBayLogForm from '../components/NeweBayLogForm';
+import SalesTable from '../components/SalesTable';
 
 
 
@@ -22,9 +23,16 @@ const EbayLog = () => {
       <Row>
         <h1>Add to eBay Log</h1>
       </Row>
+      {
+      //   <Row>
+      //   <Col>
+      //     <NeweBayLogForm />
+      //   </Col>
+      // </Row>
+      }
       <Row>
-        <Col>
-          <NeweBayLogForm />
+        <Col md={6}>
+          <SalesTable /> 
         </Col>
       </Row>
     </Container>

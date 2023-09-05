@@ -134,7 +134,6 @@ const NeweBayLogForm = () => {
         axios.post(`${userEndpoint}/add-to-sales`, fullSale)
                 .then((res) => console.log(res))
                 .catch((err) => console.log(err))
-        // console.log(fullSale)
     }
 
 
