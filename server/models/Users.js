@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
         deposits : Number,
         total_refunds_credits : Number,
         total_cost_of_goods : Number,
+        supplies_storage_costs: Number,
         total_mileage : Number,
         mileage_deduction : Number,
         total_taxable_revenue : Number,
