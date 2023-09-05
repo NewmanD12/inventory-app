@@ -1,19 +1,21 @@
 import React from 'react'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../Hooks/Auth'
-import Container from "react-bootstrap/Container"
-import Row from "react-bootstrap/Row"
-import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
 const NeweBayLogForm = () => {
 
     const auth = useAuth()
+
+
+
     const [sale, setSale] = useState({})
     const [showingEbayRevenueInput, setShowingEbayRevenueInput] = useState(false)
     const [showingNetSalesInput, setShowingNetSalesInput] = useState(false)
+    const [showingTotalRefundsCreditsInput, setShowingTotalRefundsCreditsInput] = useState(false)
+    const [showingMileageDeductionInput, setShowingMileageDeductionInput] = useState(false)
     const  MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
     let errors = {}
     
@@ -53,6 +55,9 @@ const NeweBayLogForm = () => {
                         if(typeof manual_input === 'number' && !isNaN(manual_input)){
                             try {
                                 setSale({...sale, ['net_sales'] : manual_input})
+                                if(sale.deposits){
+                                    setSale({...sale, ['net_sales'] : manual_input, ['total_refunds_credits'] : manual_input - sale.deposits})
+                                }
                                 toggleNetSalesInput()
                             }
                             catch (e) {
@@ -64,6 +69,57 @@ const NeweBayLogForm = () => {
                 </div>
     }
 
+    const TotalRefundsCreditsInput = () => {
+        return  <div>
+                    <Form.Control id='total_refunds_credits' type='text' name='total_refunds_credits' />
+                    <Button onClick={() => {
+                        const input = document.getElementById('total_refunds_credits')
+                        const manual_input = parseFloat(input.value)
+                        // console.log(manual_input)
+                        if(typeof manual_input === 'number' && !isNaN(manual_input)){
+                            try {
+                                setSale({...sale, ['total_refunds_credits'] : manual_input})
+                                toggleTotalRefundsCreditsInput()
+                            }
+                            catch (e) {
+                                console.log(e.toString())
+                            }
+                        }
+                    }}>Change</Button>
+                    <Button variant='danger' onClick={toggleTotalRefundsCreditsInput}>Cancel</Button>
+                </div>
+    }
+
+    const MileageDeductionInput = () => {
+        return  <div>
+                    <Form.Control id='mileage_deduction' type='text' name='mileage_deduction'/> 
+                    <Button onClick={() => {
+                        const input = document.getElementById('mileage_deduction')
+                        const manual_input = parseFloat(input.value)
+                        // console.log(manual_input)
+                        if(typeof manual_input === 'number' && !isNaN(manual_input)){
+                            try {
+                                setSale({...sale, ['mileage_deduction'] : manual_input})
+                                toggleMileageDeductionInput()
+                            }
+                            catch (e) {
+                                console.log(e.toString())
+                            }
+                        }
+                    }}>Change</Button>
+                    <Button variant='danger' onClick={toggleMileageDeductionInput}>Cancel</Button>
+                </div>
+    }
+
+    const calculateTotalExpenses = () => {
+        if(sale.ebay_fees && sale.shipping_labels && sale.total_refunds_credits && sale.total_cost_of_goods && sale.supplies_storage_costs && sale.mileage_deduction){
+            setSale({...sale, ['total_expenses'] : sale.ebay_fees + sale.shipping_labels + sale.total_refunds_credits + sale.total_cost_of_goods + sale.supplies_storage_costs + sale.mileage_deduction})
+            return true
+            // console.log('total expense')
+        }
+        return 'Not enough info yet'
+    }
+
     const toggleEbayRevenueInput = () => {
         setShowingEbayRevenueInput(!showingEbayRevenueInput)
     }
@@ -71,6 +127,16 @@ const NeweBayLogForm = () => {
     const toggleNetSalesInput = () => {
         setShowingNetSalesInput(!showingNetSalesInput)
     }
+
+    const toggleTotalRefundsCreditsInput = () => {
+        setShowingTotalRefundsCreditsInput(!showingTotalRefundsCreditsInput)
+    }
+
+    const toggleMileageDeductionInput = () => {
+        setShowingMileageDeductionInput(!showingMileageDeductionInput)
+    }
+
+
 
     return (
 
@@ -108,10 +174,9 @@ const NeweBayLogForm = () => {
                 <Form.Control type="text" name="taxes_and_fees"/>
             </Form.Group>
 
-
             <Form.Group>
                 <Form.Label>Ebay Revenue:</Form.Label>
-                <p>{!isNaN(sale.ebay_revenue) ? sale.ebay_revenue : null}</p>
+                <p>${!isNaN(sale.ebay_revenue) ? sale.ebay_revenue : 0}</p>
                 {showingEbayRevenueInput ? <EbayRevenueInput/> : null}
                 {!showingEbayRevenueInput ? <p onClick={toggleEbayRevenueInput}>Not look right? Click here to manually input your eBay Revenue.</p> : null}
             </Form.Group>
@@ -140,13 +205,17 @@ const NeweBayLogForm = () => {
 
             <Form.Group>
                 <Form.Label>Net Sales:</Form.Label>
-                <p>{!isNaN(sale.net_sales) ? sale.net_sales : null}</p>
+                <p>${!isNaN(sale.net_sales) ? sale.net_sales : 0}</p>
                 {showingNetSalesInput ? <NetSalesInput /> : null}
                 {!showingNetSalesInput ? <p onClick={toggleNetSalesInput}>Not look right? Click here to manually input your net sales.</p> : null}
             </Form.Group>
 
             <Form.Group onChange={(e) => {
                 setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
+                if(sale.net_sales){
+                    const total_refund_credits = (sale.net_sales - parseFloat(e.target.value)).toFixed(2)
+                    setSale({...sale, [e.target.name]: parseFloat(e.target.value), ['total_refunds_credits'] : parseFloat(total_refund_credits)})
+                }
             }}>
                 <Form.Label>Deposits:</Form.Label>
                 <Form.Control type="text" name="deposits"/>
@@ -154,7 +223,9 @@ const NeweBayLogForm = () => {
 
             <Form.Group>
                 <Form.Label>Total Refunds and Credits:</Form.Label>
-                <Form.Control type="text" name="total_refunds_credits"/>
+                <p>${!isNaN(sale.total_refunds_credits) ? sale.total_refunds_credits : 0}</p>
+                {showingTotalRefundsCreditsInput ? <TotalRefundsCreditsInput /> : null}
+                {!showingTotalRefundsCreditsInput ? <p onClick={toggleTotalRefundsCreditsInput}>Not look right? Click here to manually input your refunds and credits.</p> : null}
             </Form.Group>
 
             <Form.Group onChange={(e) => {
@@ -165,33 +236,47 @@ const NeweBayLogForm = () => {
             </Form.Group>
 
             <Form.Group onChange={(e) => {
+                setSale({...sale, ['supplies_storage_costs'] : parseFloat(e.target.value)})
+            }}>
+                <Form.Label>Supplies / Storage Costs:</Form.Label>
+                <Form.Control type="text" name="supplies_storage_costs"/>
+            </Form.Group>
+
+            <Form.Group onChange={(e) => {
                 const mileage = parseFloat(e.target.value)
-                setSale({...sale, [e.target.name]: mileage, ['mileage_deduction'] : (mileage * .57).toFixed(2)})
+                const mileage_deduction = (mileage * .57).toFixed(2)
+                setSale({...sale, [e.target.name]: mileage, ['mileage_deduction'] : parseFloat(mileage_deduction)})
+                if(sale.ebay_fees && sale.shipping_labels && sale.total_refunds_credits && sale.total_cost_of_goods && sale.supplies_storage_costs){
+                    const total_expenses = (sale.ebay_fees + sale.shipping_labels + sale.total_refunds_credits + sale.total_cost_of_goods + sale.supplies_storage_costs + parseFloat(mileage_deduction))
+                    const taxable_total = sale.deposits - sale.total_cost_of_goods - sale.supplies_storage_costs - parseFloat(mileage_deduction)
+                    console.log(taxable_total)
+                    setSale({...sale, ['mileage_deduction'] : parseFloat(mileage_deduction), ['total_expenses'] : parseFloat(total_expenses), ['taxable_total'] : taxable_total})
+                }
             }}>
                 <Form.Label>Total Mileage:</Form.Label>
                 <Form.Control type="text" name="total_mileage"/>
             </Form.Group>
 
+            <Form.Group>
+                <Form.Label>Mileage Deduction:</Form.Label>
+                <p>{!isNaN(sale.mileage_deduction) ? sale.mileage_deduction : 0}</p>
+                {showingMileageDeductionInput ? <MileageDeductionInput /> : null}
+                {!showingMileageDeductionInput ? <p onClick={toggleMileageDeductionInput}>Not look right? Click here to manually input your mileage deductions.</p> : null}
+            </Form.Group>
 
-            <Form.Group onChange={(e) => {
-                setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
-            }}>
+            <Form.Group>
                 <Form.Label>Total Taxable Revenue:</Form.Label>
-                <Form.Control type="text" name="total_taxable_revenue"/>
+                <p>${!isNaN(sale.ebay_revenue) ? sale.ebay_revenue : 0}</p>
             </Form.Group>
 
-            <Form.Group onChange={(e) => {
-                setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
-            }}>
+            <Form.Group>
                 <Form.Label>Total Expenses:</Form.Label>
-                <Form.Control type="text" name="total_expenses"/>
+                <p>${sale.total_expenses ? sale.total_expenses : 0}</p>
             </Form.Group>
 
-            <Form.Group onChange={(e) => {
-                setSale({...sale, [e.target.name]: parseFloat(e.target.value)})
-            }}>
+            <Form.Group>
                 <Form.Label>Taxable Total:</Form.Label>
-                <Form.Control type="text" name="taxable_total"/>
+                <p>${sale.taxable_total ? sale.taxable_total : 0}</p>
             </Form.Group>         
 
             <Button
