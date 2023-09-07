@@ -47,6 +47,33 @@ async function createUser(req, res) {
     }
 }
 
+const findUser = async (req, res) => {
+    try {
+
+        let user = await User.findOne({_id : req.params.userID})
+        user = {
+            firstName : user.firstName,
+            lastName : user.lastName,
+            mileages : user.mileages,
+            sales : user.sales,
+            supplies : user.supplies,
+            userName : user.userName
+        }
+
+        res.json({
+            success : true,
+            user : user
+        })
+
+    }
+    catch (e) {
+        res.json({
+            success : false,
+            error : e.toString()
+        })
+    }
+}
+
 const login = async (req, res) => {
     try {
         const { userName, password} = req.body;
@@ -86,7 +113,7 @@ const login = async (req, res) => {
 
 async function addToSales(req, res) {
     try {
-        const { month, year, total_sales, taxes_and_fees, ebay_revenue, ebay_fees, shipping_labels, net_sales, deposits, total_refunds_credits, total_cost_of_goods, total_mileage, mileage_deduction, total_taxable_revenue, total_expenses, taxable_total, userID } = req.body
+        const { month, year, total_sales, taxes_and_fees, ebay_revenue, ebay_fees, shipping_labels, net_sales, deposits, total_refunds_credits, total_cost_of_goods, supplies_storage_costs, total_mileage, mileage_deduction, total_taxable_revenue, total_expenses, taxable_total, userID } = req.body
 
         const user = await User.findOne({_id : userID})
         let updatedSales = []
@@ -102,6 +129,7 @@ async function addToSales(req, res) {
             deposits,
             total_refunds_credits,
             total_cost_of_goods,
+            supplies_storage_costs,
             total_mileage,
             mileage_deduction,
             total_taxable_revenue,
@@ -234,6 +262,7 @@ async function addToMileages(req, res){
 
 module.exports = {
     createUser,
+    findUser,
     login,
     addToSales,
     addToCostOfGoods,
