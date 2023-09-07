@@ -136,7 +136,6 @@ const NeweBayLogForm = () => {
                 .catch((err) => console.log(err))
     }
 
-
     return (
 
         <Form>
@@ -249,7 +248,7 @@ const NeweBayLogForm = () => {
                     const total_expenses = (sale.ebay_fees + sale.shipping_labels + sale.total_refunds_credits + sale.total_cost_of_goods + sale.supplies_storage_costs + parseFloat(mileage_deduction))
                     const taxable_total = sale.deposits - sale.total_cost_of_goods - sale.supplies_storage_costs - parseFloat(mileage_deduction)
                     console.log(taxable_total)
-                    setSale({...sale, ['mileage_deduction'] : parseFloat(mileage_deduction), ['total_expenses'] : parseFloat(total_expenses), ['taxable_total'] : taxable_total})
+                    setSale({...sale, ['total_mileage'] : mileage, ['mileage_deduction'] : parseFloat(mileage_deduction), ['total_expenses'] : parseFloat(total_expenses), ['taxable_total'] : taxable_total})
                 }
             }}>
                 <Form.Label>Total Mileage:</Form.Label>

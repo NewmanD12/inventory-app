@@ -14,9 +14,14 @@ import SalesTable from '../components/SalesTable';
 
 const EbayLog = () => {
   const auth = useAuth()
-  const [sale, setSale] = useState({})
+  const [showForm, setShowForm] = useState(false)
   const  MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
+  const handleShowForm = () => {
+    setShowForm(!showForm)
+  }
+
+  console.log(showForm)
 
   return (
     <Container>
@@ -24,15 +29,21 @@ const EbayLog = () => {
         <h1>Add to eBay Log</h1>
       </Row>
       {
-      //   <Row>
-      //   <Col>
-      //     <NeweBayLogForm />
-      //   </Col>
-      // </Row>
+        showForm && <Row>
+                      <Col>
+                        <NeweBayLogForm />
+                      </Col>
+                      <Button variant='danger' onClick={() => handleShowForm()}>Cancel</Button>
+                    </Row>
       }
       <Row>
-        <Col md={6}>
+        <Col>
           <SalesTable /> 
+        </Col>
+      </Row>
+      <Row className='justify-content-center'>
+        <Col xs={4}>
+          <Button onClick={() => handleShowForm()}>Create New +</Button>
         </Col>
       </Row>
     </Container>
