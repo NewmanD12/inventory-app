@@ -9,40 +9,57 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import NeweBayLogForm from '../components/NeweBayLogForm';
 import SalesTable from '../components/SalesTable';
-
-
+import EditSaleModal from '../components/EditSaleModal';
+import Modal from 'react-bootstrap/Modal';
 
 const EbayLog = () => {
   const auth = useAuth()
   const [showForm, setShowForm] = useState(false)
-  const  MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+  const [modalShow, setModalShow] = useState(false);
+  const [saleID, setSaleID] = useState('')
 
   const handleShowForm = () => {
     setShowForm(!showForm)
   }
 
-  console.log(showForm)
+  // console.log(showForm)
 
   return (
     <Container>
+
+      <Row>
+        <EditSaleModal
+          show={modalShow}
+          onHide={() => setModalShow(false)}
+          saleid={saleID}
+        />
+      </Row>
+
       <Row>
         <h1>Add to eBay Log</h1>
       </Row>
-      {
-        showForm && <Row>
-                      <Col>
-                        <NeweBayLogForm />
-                      </Col>
-                      <Button variant='danger' onClick={() => handleShowForm()}>Cancel</Button>
-                    </Row>
-      }
+
       <Row>
-        <Col>
-          <SalesTable /> 
+        {
+          showForm && <Row>
+                        <Col>
+                          <NeweBayLogForm />
+                          <Button variant='danger' onClick={() => handleShowForm()}>Cancel</Button>
+                        </Col>
+                      </Row>
+        }
+      </Row>
+
+      <Row className='justify-content-center'>
+        <Col xs={12}>
+          <SalesTable 
+            setSaleID = {setSaleID}
+            setModalShow = {setModalShow}
+          /> 
         </Col>
       </Row>
       <Row className='justify-content-center'>
-        <Col xs={4}>
+        <Col sm={4} className='d-flex justify-content-center'>
           <Button onClick={() => handleShowForm()}>Create New +</Button>
         </Col>
       </Row>

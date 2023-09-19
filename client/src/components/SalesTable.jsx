@@ -2,13 +2,18 @@ import React, { useEffect, useState } from 'react'
 import Table from 'react-bootstrap/Table';
 import { useAuth } from '../Hooks/Auth'
 import axios from 'axios';
+import { Button } from 'react-bootstrap';
+import './SalesTable.css'
 
-const SalesTable = () => {
+const SalesTable = (props) => {
 
-    const HEADERS = ['Month', 'Year', 'Total Sales', 'Taxes and Fees', 'eBay Revenue', 'eBay Fees', 'Shipping Labels', 'Net Sales', 'Deposits', 'Refunds/Credits', 'Cost of Goods', 'Supplies/Storage Cost', 'Mileage', 'Mileage Deduction', 'Taxable Total']
+    const HEADERS = ['Month', 'Year', 'Total Sales', 'Taxes and Fees', 'eBay Revenue', 'eBay Fees', 'Shipping Labels', 'Net Sales', 'Deposits', 'Refunds/Credits', 'Cost of Goods', 'Supplies/Storage Cost', 'Mileage', 'Mileage Deduction', 'Taxable Total', 'Actions']
+
+    // console.log(props)
 
     const auth = useAuth()
     const [user, setUser] = useState({})
+    // console.log(user)
 
     const userEndpoint = import.meta.env.VITE_USER_ENDPOINT
 
@@ -24,7 +29,7 @@ const SalesTable = () => {
     
 
     return (
-        <Table striped bordered hover >
+        <Table striped bordered hover>
         <thead>
             <tr>
             {HEADERS.map((header, index) => {
@@ -32,12 +37,12 @@ const SalesTable = () => {
             })}
             </tr>
         </thead>
-        <tbody className='text-end'>
+        <tbody>
             { 
                 user.sales && user.sales.map((sale, index) => {
-                    return  <tr key={index} className='text-align-end'>
-                                <td>{sale.month}</td>
-                                <td>{sale.year}</td>
+                    return  <tr key={index} className='text-center align-middle'>
+                                <td className='sale_month_td'>{sale.month}</td>
+                                <td className='sale_year_td'>{sale.year}</td>
                                 <td>{sale.total_sales}</td>
                                 <td>{sale.taxes_and_fees}</td>
                                 <td>{sale.ebay_revenue}</td>
@@ -51,6 +56,10 @@ const SalesTable = () => {
                                 <td>{sale.total_mileage}</td>
                                 <td>{sale.mileage_deduction}</td>
                                 <td>{sale.taxable_total}</td>
+                                <td><Button onClick={() => {
+                                    props.setModalShow(true)
+                                    props.setSaleID(sale._id)
+                                }}>Edit</Button></td>
                             </tr>
                 })
             }

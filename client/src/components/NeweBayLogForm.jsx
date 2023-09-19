@@ -10,15 +10,13 @@ const NeweBayLogForm = () => {
 
     const userEndpoint = import.meta.env.VITE_USER_ENDPOINT
     const auth = useAuth()
-    // console.log(auth)
-
 
     const [sale, setSale] = useState({})
     const [showingEbayRevenueInput, setShowingEbayRevenueInput] = useState(false)
     const [showingNetSalesInput, setShowingNetSalesInput] = useState(false)
     const [showingTotalRefundsCreditsInput, setShowingTotalRefundsCreditsInput] = useState(false)
     const [showingMileageDeductionInput, setShowingMileageDeductionInput] = useState(false)
-    const  MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+    const  MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     let errors = {}
     
     const EbayRevenueInput = () => {
@@ -130,7 +128,10 @@ const NeweBayLogForm = () => {
     }
 
     const handleSubmit = () => {
-        const fullSale = {...sale, ['userID'] : auth.userID}
+        const fullSale = {...sale, 
+            ['userID'] : auth.userID, 
+            ['total_taxable_revenue'] : sale.ebay_revenue
+        }
         axios.post(`${userEndpoint}/add-to-sales`, fullSale)
                 .then((res) => console.log(res))
                 .catch((err) => console.log(err))
